@@ -112,19 +112,22 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     }
     
     // returns base 64 encoded overlay square based on tokenId
-    function overlay(uint256 tokenid) public view returns (string memory) {
-        // <rect class="o"  fill='red'  x='0'  y='0'   />
-        uint256 groupId = tokenid - (tokenid % 5); // base token in a group
+    function overlay(uint256 tokenid) public pure returns (string memory) {
         uint256 rarityLevel = tokenid % 5;
         string[5] memory overlayOptions = ['ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzI3N2ViOCcgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzI3Yjg1YScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nI2Q2NTE1MScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nI2Y3ZGQ1OScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzc0MjdiOCcgIHg9JzAnICB5PScwJy8+'];
         return overlayOptions[rarityLevel];
     }
     
     function getAttributes(uint256 tokenid) public view returns (string memory){
-        uint256 groupId = tokenid - (tokenid % 5); // base token in a group
+        uint256 groupId = (tokenid - (tokenid % 5))/5; // base token in a group /5
         uint256 rarityLevel = tokenid % 5;
         string[5] memory rarity = ['common', 'uncommon', 'rare', 'ledgendary', 'unique'];
-        string[8] memory iv = ['0', '1', '2', '3', '4', '5', '6', '7'];
+        string[11] memory iv = ['"0"','"1"', '"2"', '"3"', '"4"', '"5"', '"6"', '"7"', '"8"', '"9"', '"10"'];
+        
+        // console.log(tokenid);
+        // console.log('group', groupId);
+        // console.log('iv', intrinsicValues[groupId]);
+        console.log('iv string', iv[intrinsicValues[groupId]]);
 
         bytes memory attributes = abi.encodePacked(
             '"attributes": [ { "trait_type": "Rarity Level", "value": "',
@@ -140,9 +143,9 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         );
     }
 
-    function tokenSVG(uint256 tokenId) public view returns (string memory) {
+    function tokenSVG(uint256 groupId) public view returns (string memory) {
         // 6 lots of 8 rows 
-        string[6] memory buffer = generateSvgData(tokenId);
+        string[6] memory buffer = generateSvgData(groupId);
 
         string memory svg = 
             string.concat(
@@ -391,12 +394,12 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
 
         statuses[requestId].fulfilled = true;
         for (uint256 i = 0; i < 5; i++) {
-            uint256 groupId = randomWords[i] % 2;
+            uint256 groupId = randomWords[i] % 4;
             uint256 randomR = (randomWords[i+5] % 500)+1;
             uint256 rarityRank = randomRarity(randomR);
-            uint256 tokenId = groupId * rarityRank;
+            uint256 tokenId = (groupId*5) + rarityRank;
 
-            if(rarityRank == 5 && minted1of1[tokenId]) {
+            if(rarityRank == 5 && minted1of1[groupId]) {
                 tokenId = tokenId -1; // 1/1 taken downrank to ledgendary
             } else if(rarityRank == 5){
                 minted1of1[tokenId] = true;
@@ -421,15 +424,15 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     
     function randomRarity(uint256 input) internal pure returns(uint256){
         if(input < 6){
-            return 5; // 5/500 -> 1%
+            return 4; // 5/500 -> 1%
         } else if (input < 26 ){
-            return 4; // 5%
+            return 3; // 5%
         } else if (input < 76 ){
-            return 3; // 15%
+            return 2; // 15%
         } else if (input < 226) {
-            return 2; // 30%
+            return 1; // 30%
         } else {
-            return 1; // 50%
+            return 0; // 50%
         }
     }
 
