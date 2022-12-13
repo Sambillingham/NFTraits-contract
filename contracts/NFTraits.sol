@@ -119,7 +119,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         // <rect class="o"  fill='red'  x='0'  y='0'   />
         uint256 groupId = tokenid - (tokenid % 5); // base token in a group
         uint256 rarityLevel = tokenid % 5;
-        string[5] memory overlay = ['PHJlY3QgY2xhc3M9Im8iICBmaWxsPSdibHVlJyAgeD0nMCcgIHk9JzAnIC8+', 'PHJlY3QgY2xhc3M9Im8iICBmaWxsPSdncmVlbicgIHg9JzAnICB5PScwJy8+', 'PHJlY3QgY2xhc3M9Im8iICBmaWxsPSdyZWQnICB4PScwJyAgeT0nMCcgIC8+', 'PHJlY3QgY2xhc3M9Im8iICBmaWxsPSd5ZWxsb3cnICB4PScwJyAgeT0nMCcuIC8+', 'PHJlY3QgY2xhc3M9Im8iICBmaWxsPScjMDAwMDAwJyAgeD0nMCcgIHk9JzAnIC8+'];
+        string[5] memory overlay = ['PHJlY3QgY2xhc3M9J28nICBmaWxsPSdibHVlJyAgeD0nMCcgIHk9JzAnIC8+', 'PHJlY3QgY2xhc3M9Im8iICBmaWxsPSdncmVlbicgIHg9JzAnICB5PScwJy8+', 'PHJlY3QgY2xhc3M9J28nICBmaWxsPSdncmVlbicgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgIGZpbGw9J3llbGxvdycgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgIGZpbGw9J3B1cnBsZScgIHg9JzAnICB5PScwJy8+'];
         return overlay[rarityLevel];
     }
     
@@ -339,15 +339,17 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     // function uri(uint256 tokenId) public pure override(ERC1155) returns (string memory) { 
     //     // Read from SStore2 -> Call Render function with tokenId + layers uint256[18] 
 
-    //     string memory svgStart = '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><text style="white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 271.5px;" x="45.881" y="346.563">';
-    //     string memory svgEnd = '</text></svg>';
-    //     string memory svg64 = Base64.encode(abi.encodePacked(svgStart,Strings.toString(tokenId),svgEnd));
+    //     string memory svgStart = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' shape-rendering='crispEdges' viewBox='0 0 500 500'><text style='white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 271.5px;' x='45.881' y='346.563'>";
+    //     string memory svgEnd = "</text></svg>";
+    //     // string memory svg64 = Base64.encode(abi.encodePacked(svgStart,Strings.toString(tokenId),svgEnd));
+    //     string memory svg = string(abi.encodePacked(svgStart,Strings.toString(tokenId),svgEnd));
 
     //     // Tmp
     //     return string(abi.encodePacked('data:application/json;base64,', Base64.encode(abi.encodePacked(
     //         '{',
     //             '"name": "', Strings.toString(tokenId), '", ',
-    //             '"image": "data:image/svg+xml;base64,', svg64, '", ',
+    //             // '"image_data": "data:image/svg+xml;base64,', svg64, '", ',
+    //             '"image_data": "', svg, '", ',
     //             getAttributes(tokenId),
     //         '}'))
     //     ));
