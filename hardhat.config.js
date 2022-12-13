@@ -1,3 +1,4 @@
+require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
 require("hardhat-gas-reporter");
 require('dotenv').config();
@@ -11,15 +12,26 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 1000,
-      },
+        runs: 2000,
+        details: {
+            yul: true,
+            yulDetails: {
+                stackAllocation: true,
+                optimizerSteps: "dhfoDgvulfnTUtnIf"
+            }
+        }
+    }
     },
   },
   networks: {
     goerli: {
       url: process.env.GOERLI_ALCHEMY_KEY, 
       accounts: [process.env.PRIVATE_KEY],
-    }
+    },
+    mumbai: {
+      url: process.env.MUMBAI_ALCHEMY_KEY, 
+      accounts: [process.env.PRIVATE_KEY],
+    },
   },
   gasReporter: {
     currency: 'USD',
@@ -27,5 +39,6 @@ module.exports = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API,
+    // apiKey: process.env.POLYSCAN_API,
   }
 };
