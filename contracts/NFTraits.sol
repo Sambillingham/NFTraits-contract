@@ -38,12 +38,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     uint16 constant requestConfirmations = 3;
 
     mapping(uint256 => bool) public minted1of1;
-    // constructor()
-    //     VRFV2WrapperConsumerBase(linkAddress, vrfWrapperAddress)
-    //     ERC1155("NFT") 
-    // {}
-    //  --> 
-        struct SVGRowBuffer {
+
+    struct SVGRowBuffer {
         string one; 
         string two; 
         string three;
@@ -124,11 +120,6 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         string[5] memory rarity = ['common', 'uncommon', 'rare', 'ledgendary', 'unique'];
         string[11] memory iv = ['"0"','"1"', '"2"', '"3"', '"4"', '"5"', '"6"', '"7"', '"8"', '"9"', '"10"'];
         
-        // console.log(tokenid);
-        // console.log('group', groupId);
-        // console.log('iv', intrinsicValues[groupId]);
-        console.log('iv string', iv[intrinsicValues[groupId]]);
-
         bytes memory attributes = abi.encodePacked(
             '"attributes": [ { "trait_type": "Rarity Level", "value": "',
             rarity[rarityLevel],
@@ -322,51 +313,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     
         return colours;
     }
-    // --> 
 
-
-
-
-
-
-    // get/set renderer contract
-
-    // | tokenlayers | Intrinsicnames | names | Description | additional Attributes |
-    // function store (uint256 tokenId, uint256[18] calldata layers, uint256 intrinsicValue, string calldata name) public {}
-    // function storeBatch //
-
-    // Returns On-chain metadata from renderer contract
-    // function uri(uint256 tokenId) public pure override(ERC1155) returns (string memory) { 
-    //     // Read from SStore2 -> Call Render function with tokenId + layers uint256[18] 
-
-    //     string memory svgStart = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' shape-rendering='crispEdges' viewBox='0 0 500 500'><text style='white-space: pre; fill: rgb(51, 51, 51); font-family: Arial, sans-serif; font-size: 271.5px;' x='45.881' y='346.563'>";
-    //     string memory svgEnd = "</text></svg>";
-    //     // string memory svg64 = Base64.encode(abi.encodePacked(svgStart,Strings.toString(tokenId),svgEnd));
-    //     string memory svg = string(abi.encodePacked(svgStart,Strings.toString(tokenId),svgEnd));
-
-    //     // Tmp
-    //     return string(abi.encodePacked('data:application/json;base64,', Base64.encode(abi.encodePacked(
-    //         '{',
-    //             '"name": "', Strings.toString(tokenId), '", ',
-    //             // '"image_data": "data:image/svg+xml;base64,', svg64, '", ',
-    //             '"image_data": "', svg, '", ',
-    //             getAttributes(tokenId),
-    //         '}'))
-    //     ));
-    // }
-
-    // function getAttributes(uint256 tokenid) public pure returns (string memory){
-    //     uint256 rarityLevel = tokenid % 5;
-    //     string[5] memory rarity = ['common', 'uncommon', 'rare', 'ledgendary', 'unique'];
-
-    //     return string(abi.encodePacked(
-    //         '"attributes": [ { "trait_type": "Rarity Level", "value": "',
-    //         rarity[rarityLevel],
-    //         '"}]'
-    //     ));
-    // }
-
-     function mintTraits() external returns (uint256) {
+    function mintTraits() external returns (uint256) {
         uint256 requestId = requestRandomness(
             callbackGasLimit,
             requestConfirmations,
