@@ -95,8 +95,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         return
             string(
                 abi.encodePacked(
-                    // "data:application/json;base64,eyAgImltYWdlX2RhdGEiOiAiPHN2ZyB2ZXJzaW9uPScxLjEnIHZpZXdCb3g9JzAgMCA0ODAgNDgwJyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHNoYXBlLXJlbmRlcmluZz0nY3Jpc3BFZGdlcyc+",
-                    "data:application/json;base64,eyAgICJpbWFnZSIgOiAiPHN2ZyB2ZXJzaW9uPScxLjEnIHZpZXdCb3g9JzAgMCA0ODAgNDgwJyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHNoYXBlLXJlbmRlcmluZz0nY3Jpc3BFZGdlcyc+",
+                    "data:application/json;base64,eyAgImltYWdlX2RhdGEiOiAiPHN2ZyB2ZXJzaW9uPScxLjEnIHZpZXdCb3g9JzAgMCA0ODAgNDgwJyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHNoYXBlLXJlbmRlcmluZz0nY3Jpc3BFZGdlcyc+",
                     buffer[0],
                     buffer[1],
                     buffer[2],
@@ -117,8 +116,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         // <rect class="o"  fill='red'  x='0'  y='0'   />
         uint256 groupId = tokenid - (tokenid % 5); // base token in a group
         uint256 rarityLevel = tokenid % 5;
-        string[5] memory overlay = ['PHJlY3QgY2xhc3M9J28nICBmaWxsPSdibHVlJyAgeD0nMCcgIHk9JzAnIC8+', 'PHJlY3QgY2xhc3M9Im8iICBmaWxsPSdncmVlbicgIHg9JzAnICB5PScwJy8+', 'PHJlY3QgY2xhc3M9J28nICBmaWxsPSdncmVlbicgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgIGZpbGw9J3llbGxvdycgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgIGZpbGw9J3B1cnBsZScgIHg9JzAnICB5PScwJy8+'];
-        return overlay[rarityLevel];
+        string[5] memory overlayOptions = ['ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzI3N2ViOCcgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzI3Yjg1YScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nI2Q2NTE1MScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nI2Y3ZGQ1OScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzc0MjdiOCcgIHg9JzAnICB5PScwJy8+'];
+        return overlayOptions[rarityLevel];
     }
     
     function getAttributes(uint256 tokenid) public view returns (string memory){
