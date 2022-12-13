@@ -77,19 +77,18 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
 
     address[] private _tokenDatas;
 
+    function store (uint256 groupId, uint256[18] calldata layers, uint256 intrinsicValue, string calldata name) public {
+        tokenLayers[groupId] = SSTORE2.write(abi.encode(layers));
 
-    function store (uint256 tokenId, uint256[18] calldata layers, uint256 intrinsicValue, string calldata name) public {
-        tokenLayers[tokenId] = SSTORE2.write(abi.encode(layers));
-
-        // encode with token layers
-        // extract with colours and pass as output from colours function
-        intrinsicValues[tokenId] = intrinsicValue;
-        names[tokenId] = name;
+        // abi encode/decode with token layers?
+        intrinsicValues[groupId] = intrinsicValue;
+        names[groupId] = name;
     }
 
     function uri(uint256 tokenId) public view override returns (string memory) {
 
-        string[6] memory buffer = generateSvgData(tokenId);
+        uint256 groupId = (tokenId - (tokenId % 5))/5; // base token in a group
+        string[6] memory buffer = generateSvgData(groupId);
         string memory att = getAttributes(tokenId);
         string memory overlaySquare = overlay(tokenId);
 
@@ -106,8 +105,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
                     buffer[5],
                     overlaySquare,
                     "PHN0eWxlPnJlY3Qge3dpZHRoOjEwcHg7aGVpZ2h0OjEwcHg7IH0gLm8geyBtaXgtYmxlbmQtbW9kZTogb3ZlcmxheTsgd2lkdGg6IDQ4MHB4OyBoZWlnaHQ6IDQ4MHB4OyB9IDwvc3R5bGU+PC9zdmc+IiwgICJuYW1lIjogIlRyYWl0cy4g", //style tag + name
-                    names[tokenId],// name here - needs to be pre-base64 encoded or padded with space char before encoding 
-                    'IyAgMDAw', // need function to take uint256 -> base64 encoded string
+                    names[groupId],// name here - needs to be pre-base64 encoded or padded with space char before encoding 
                     "IiwgImRlc2NyaXB0aW9uIjogIlRyYWl0cyIs", // description 
                     att // last (okay if it includes padding at the end )
                 )
@@ -163,7 +161,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     }
 
 
-    function generateSvgData(uint256 tokenId) private view returns (string[6] memory) {
+    function generateSvgData(uint256 groupId) private view returns (string[6] memory) {
         SVGCursor memory cursor;
 
         SVGRowBuffer memory cursorRow;
@@ -179,7 +177,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
             "MDAw", "MDEw", "MDIw", "MDMw", "MDQw", "MDUw", "MDYw", "MDcw", "MDgw", "MDkw", "MTAw", "MTEw", "MTIw", "MTMw", "MTQw", "MTUw", "MTYw", "MTcw", "MTgw", "MTkw", "MjAw", "MjEw", "MjIw", "MjMw", "MjQw", "MjUw", "MjYw", "Mjcw", "Mjgw", "Mjkw", "MzAw", "MzEw", "MzIw", "MzMw", "MzQw", "MzUw", "MzYw", "Mzcw", "Mzgw", "Mzkw", "NDAw", "NDEw", "NDIw", "NDMw", "NDQw", "NDUw", "NDYw", "NDcw"
         ];
 
-        string[2304] memory colours  = getColoursFromLayers(tokenId);
+        string[2304] memory colours  = getColoursFromLayers(groupId);
 
         for (uint256 row = 0; row < 48; row++) {
             
@@ -283,7 +281,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
             );
     }
 
-    function getColoursFromLayers (uint256 tokenId) public view returns (string[2304] memory){
+    function getColoursFromLayers (uint256 groupId) public view returns (string[2304] memory){
         bytes1[8] memory bitMask;
         bitMask[0] = (0x7F); // 01111111
         bitMask[1] = (0xBF); // 10111111
@@ -299,7 +297,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         uint8 bit1;
         uint8 bit2;
         
-        uint256[18] memory layers = abi.decode( SSTORE2.read(tokenLayers[tokenId]), (uint256[18]));
+        uint256[18] memory layers = abi.decode( SSTORE2.read(tokenLayers[groupId]), (uint256[18]));
 
         for (uint256 l; l < 9; l++) {
             bytes32 layer1 = bytes32(uint256(layers[l]));
