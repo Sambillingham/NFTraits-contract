@@ -10,6 +10,10 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@0xsequence/sstore2/contracts/SSTORE2.sol";
 
+interface ERC721 {
+    function balanceOf(address account) external view returns (uint256);
+}
+
 contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     event MintRandomRequest(uint256 requestId);
 
@@ -36,6 +40,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     uint32 constant callbackGasLimit = 1_500_000;
     uint32 constant numWords = 10;
     uint16 constant requestConfirmations = 3;
+
+    address blergsTokenAddress = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB; // 
 
     mapping(uint256 => bool) public minted1of1;
 
@@ -72,6 +78,12 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     mapping(uint256 => string) names;
 
     address[] private _tokenDatas;
+
+    uint256 constant RARITY_MODIFIER_PERCENTAGE = 33;
+    uint256 constant BATCH_SIZE = 5;
+    uint256 public season 1;
+    uint256[] public maxPerSeason = [1000, 3500, 7500, 11500, 19500, 35500];
+    uint256 public batchesMinted = 0;
 
     function store (uint256 groupId, uint256[18] calldata layers, uint256 intrinsicValue, string calldata name) public {
         tokenLayers[groupId] = SSTORE2.write(abi.encode(layers));
@@ -339,15 +351,20 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         override
     {
         require(statuses[requestId].fees > 0, "Request not found");
+        require( batchesMinted <= maxPerSeason[season], "MAX minted during Season")
+
+        uint256 groupIdMin = [0, 250, 500, 1500, 2750];
+        uint256 groupIdMax = [250, 500, 1500, 2750, 5000];
+        uint256 SEASON = seasonReducer(season, randomWords[randomWords[0]% 10]);
 
         statuses[requestId].fulfilled = true;
         for (uint256 i = 0; i < 5; i++) {
-            uint256 groupId = randomWords[i] % 4;
+            uint256 groupId = (randomWords[i] % groupIdMax[SEASON]) + groupIdMin[SEASON]);
             uint256 randomR = (randomWords[i+5] % 500)+1;
             uint256 rarityRank = randomRarity(randomR);
             uint256 tokenId = (groupId*5) + rarityRank;
 
-            if(rarityRank == 5 && minted1of1[groupId]) {
+            if(rarityRank == 4 && minted1of1[groupId]) {
                 tokenId = tokenId -1; // 1/1 taken downrank to ledgendary
             } else if(rarityRank == 5){
                 minted1of1[tokenId] = true;
@@ -359,6 +376,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         uint256[] memory amounts = new uint256[](5);
         for (uint256 i = 0; i < 5; i++) amounts[i] = 1;
 
+        batchesMinted++;
         _mintBatch(statuses[requestId].sender, statuses[requestId].ids, amounts, '');
     }
 
@@ -371,17 +389,38 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     }
     
     function randomRarity(uint256 input) internal pure returns(uint256){
-        if(input < 6){
+        uint256 COUNT = ERC721(blergsTokenAddress).balanceOf(msg.sender);
+        uint256 rarityBonus = 1 + ((RARITY_MODIFIER_PERCENTAGE/100) * COUNT);
+        if(input < 6 * rarityBonus){
             return 4; // 5/500 -> 1%
-        } else if (input < 26 ){
+        } else if (input < 26 * rarityBonus){
             return 3; // 5%
-        } else if (input < 76 ){
+        } else if (input < 76 * rarityBonus){
             return 2; // 15%
-        } else if (input < 226) {
+        } else if (input < 226 * rarityBonus) {
             return 1; // 30%
         } else {
             return 0; // 50%
         }
+    }
+
+    function seasonReducer(uint256 currentSeason, uint256 randomNumber) internal pure returns(uint256){
+        if (currentSeason == 1) return 1;
+
+        uint256[] options = [1,10,100,1000,10000];
+        uint256 r = randomNumber % options[currentSeason-1];
+        uint256[] levels = [1];
+
+        for (uint256 i = 1; i < season; i++) {
+            uint256 c = (i-2)
+            levels.push(9*(10**))
+        }
+        for (uint256 k = 0; k < levels.length; k++) {
+            if(r <= levels[k]) {
+                return k+1
+            } 
+        }
+        return levels.length;
     }
 
     function _beforeTokenTransfer(address operator, address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
