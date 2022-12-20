@@ -1,6 +1,14 @@
 # NFTraits \[WIP\]
-    - Implements the pixel grid artwork @ https://github.com/Sambillingham/pixel-grid-svg-renderer
-    
+    - Mints Batch of Traits
+    - Chaink VRF for Random Numbers
+    - Free Mint tracking for Holders - per TokenId
+    - Rarity Modifier for Holders - +33% per tokenId
+    - Tracks/Updates Data per Season
+    - Seperates per season Metadata into own contract
+
+## Traits Metadata 
+    Implements the pixel grid artwork @ https://github.com/Sambillingham/pixel-grid-svg-renderer
+
 ## Rarity Distribution 
 Rarity is controlled by two values, Intrinsic Value(IV) and Rarity Level(RL). IV is set by the artist during deployment. The intention for Intrinsic value is to match a cumulative distribution function with each IV becoming less common as the value increases. Rarity Level describes the Common, Uncommon, Rare, Ledgendary, 1/1 status decided seperately from the Intrinsic Value. 
 
