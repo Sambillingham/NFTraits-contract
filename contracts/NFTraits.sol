@@ -93,10 +93,10 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     function uri(uint256 tokenId) public view override returns (string memory) {
         uint256 groupId = (tokenId - (tokenId % 5))/5; // base token in a group
         uint16[5] memory groupIdMin = [0, 250, 500, 1500, 2750];
-        uint16[5]  memory groupIdMax = [250, 500, 1500, 2750, 5000];
+        uint16[5] memory groupIdMax = [250, 500, 1500, 2750, 5000];
 
         for (uint256 i = 0; i < 5; i++) {
-            if( groupId > groupIdMin[i] && groupId < groupIdMax[i]) {
+            if( groupId >= groupIdMin[i] && groupId < groupIdMax[i]) {
                 return Metadata(seasons[i+1].metadataAddress).createTokenUri(tokenId);
             }
         }
@@ -120,6 +120,19 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
 
         emit MintRandomRequest(requestId);
         return requestId;
+    }
+    
+    function mintTraitsTest(uint256 _requestId, uint256[] memory _randomWords) public {
+        uint256[] memory ids = new uint256[](5);
+
+        statuses[_requestId] = mintStatus({
+            fees: 1_500_000,
+            ids: ids,
+            sender: msg.sender,
+            fulfilled: false
+        });
+
+        fulfillRandomWords(_requestId, _randomWords);
     }
 
     function mintTraitsWithBlerg(uint256 tokenId) external {
