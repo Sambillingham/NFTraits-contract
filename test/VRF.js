@@ -227,8 +227,6 @@ describe("NFTraits", async function () {
        
         NFTraits.setBlergsTokenAddress(MockBlergs.address);
         
-        // const vrfCoordinatorV2Mock = await ethers.getContractFactory("VRFCoordinatorV2Mock");
-
         await NFTraits.mintTraitsTest(123456789, [...Array(10)].map( x => rand()))
         NFTraits.setActiveSeason(2);
         await NFTraits.mintTraitsTest(1256789, [...Array(10)].map( x => rand()))
@@ -239,10 +237,6 @@ describe("NFTraits", async function () {
         await Metadata.store( 2,islandData,10,'SXNsYW5k');
         await Metadata.store( 3,waterfall,8,'d2F0ZXJmYWxs');
         await Metadata.store( 4,tentData,1,'YWJzdHJhY3Qu');
-        
-        // await NFTraits.mintTraits();
-        // await NFTraits.mintTraits();
-        // await NFTraits.mintTraits();
 
         const uri = await NFTraits.uri(0);
         console.log(uri, '...complete')
