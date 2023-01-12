@@ -50,8 +50,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     address public linkAddress;
     address public vrfWrapperAddress;
 
-    uint32 constant callbackGasLimit = 1_500_000; 
-    uint32 constant numWords = 10; // MAX for Chainlink direct funding method
+    uint32 constant callbackGasLimit = 1_000_000; 
+    uint32 constant numWords = 8;
     uint16 constant requestConfirmations = 3;
 
     address blergsTokenAddress; // 
@@ -60,13 +60,14 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     mapping(uint256 => bool) public minted1of1;
 
     uint256 constant RARITY_MODIFIER_PERCENTAGE = 33;
-    uint256 constant BATCH_SIZE = 5; // 
+    uint256 constant BATCH_SIZE = 8; 
     uint256[] public maxMintsPerSeason = [0, 1000, 3500, 7500, 11500, 19500, 35500];
     uint256 public activeSeason = 1;
     uint256 public batchesMinted = 0;
 
-    // Gives a chance to mint a tokenId form a previous season
-    // Drops by 90% each further season
+    uint16[5] groupIdMin = [0, 250, 500, 1500, 2750];
+    uint16[5] groupIdMax = [250, 500, 1500, 2750, 5000];
+
     uint16[5] options = [1,10,100,1000,10000];
     uint256[] levels;
 
@@ -92,8 +93,6 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
 
     function uri(uint256 tokenId) public view override returns (string memory) {
         uint256 groupId = (tokenId - (tokenId % 5))/5; // base token in a group
-        uint16[5] memory groupIdMin = [0, 250, 500, 1500, 2750];
-        uint16[5] memory groupIdMax = [250, 500, 1500, 2750, 5000];
 
         for (uint256 i = 0; i < 5; i++) {
             if( groupId >= groupIdMin[i] && groupId < groupIdMax[i]) {
@@ -102,14 +101,31 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         }
     }
 
-    function mintTraits() public returns (uint256) {
+    function mintTraitsWithBlerg(uint256 tokenId) external {
+        require(ERC721(blergsTokenAddress)._exists(tokenId), "Token doesn't exist");
+        require(ERC721(blergsTokenAddress).ownerOf(tokenId) == msg.sender, "Not Owner of Token");
+        require(BlergFreeMints[tokenId][activeSeason] != true, "Mint Used");
+
+        BlergFreeMints[tokenId][activeSeason] = true;
+        callVrfMint();
+    }
+
+    function mintTraits() public payable {
+        require(msg.value >= mintPrice, "Not enough ETH sent");
+        callVrfMint();
+    }
+
+    function callVrfMint() private {
+        require(OPEN , "MINTING - NOT OPEN");
+        require(batchesMinted < maxMintsPerSeason[activeSeason], "MAX minted during Season");
+
         uint256 requestId = requestRandomness(
             callbackGasLimit,
             requestConfirmations,
             numWords
         );
 
-        uint256[] memory ids = new uint256[](5);
+        uint256[] memory ids = new uint256[](8);
 
         statuses[requestId] = mintStatus({
             fees: VRF_V2_WRAPPER.calculateRequestPrice(callbackGasLimit),
@@ -135,30 +151,15 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         fulfillRandomWords(_requestId, _randomWords);
     }
 
-    function mintTraitsWithBlerg(uint256 tokenId) external {
-        require(ERC721(blergsTokenAddress)._exists(tokenId), "Token doesn't exist");
-        require(ERC721(blergsTokenAddress).ownerOf(tokenId) == msg.sender, "Not Owner of Token");
-        require(BlergFreeMints[tokenId][activeSeason] != true, "Mint Used");
-
-        BlergFreeMints[tokenId][activeSeason] = true;
-        mintTraits();
-    }
-
-    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
-        internal
-        override
-    {
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
         require(statuses[requestId].fees > 0, "Request not found");
-        require( batchesMinted <= maxMintsPerSeason[activeSeason], "MAX minted during Season");
 
-        uint16[5] memory groupIdMin = [0, 250, 500, 1500, 2750];
-        uint16[5] memory groupIdMax = [250, 500, 1500, 2750, 5000];
         uint256 SEASON = seasonReducer(activeSeason, randomWords[randomWords[0]% 10]);
         
         statuses[requestId].fulfilled = true;
-        for (uint256 i = 0; i < 5; i++) {
+        for (uint256 i = 0; i < BATCH_SIZE; i++) {
             uint256 groupId = (randomWords[i] % groupIdMax[SEASON-1]) + groupIdMin[SEASON-1];
-            uint256 randomR = (randomWords[i+5] % 500)+1;
+            uint256 randomR = (randomWords[BATCH_SIZE-i+1] % 500)+1;
             uint256 rarityRank = randomRarity(randomR);
             uint256 tokenId = (groupId*5) + rarityRank;
 
