@@ -222,15 +222,18 @@ describe("NFTraits", async function () {
 
         NFTraits.addSeason(1, Metadata.address);
         NFTraits.setActiveSeason(1);
+        NFTraits.flipOpenState();
         // // GORERLI 
         NFTraits.setVRFAddress('0x326C977E6efc84E512bB9C30f76E30c160eD06FB', '0x708701a1DfF4f478de54383E49a627eD4852C816')
        
         NFTraits.setBlergsTokenAddress(MockBlergs.address);
         
-        await NFTraits.mintTraitsTest(123456789, [...Array(10)].map( x => rand()))
+        const overrides = { value: ethers.utils.parseEther('0.01')};
+
+        await NFTraits.mintTraitsTest(123456789, [...Array(10)].map( x => rand()), overrides)
         NFTraits.setActiveSeason(2);
-        await NFTraits.mintTraitsTest(1256789, [...Array(10)].map( x => rand()))
-        await NFTraits.mintTraitsTest(125622789, [...Array(10)].map( x => rand()))
+        await NFTraits.mintTraitsTest(1256789, [...Array(10)].map( x => rand()), overrides)
+        await NFTraits.mintTraitsTest(125622789, [...Array(10)].map( x => rand()), overrides)
 
         await Metadata.store( 0,faceData,2,'RmFjZS4g');
         await Metadata.store( 1,timerData,4,'VGltZXIu');
