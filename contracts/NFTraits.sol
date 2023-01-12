@@ -54,8 +54,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     uint32 constant numWords = 8;
     uint16 constant requestConfirmations = 3;
 
-    address blergsTokenAddress; // 
-
+    address blergsTokenAddress; 
 
     mapping(uint256 => bool) public minted1of1;
 
@@ -71,27 +70,40 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     uint16[5] options = [1,10,100,1000,10000];
     uint256[] levels;
 
-    function addSeason(uint256 _seasonId, address _metadataAddress) public onlyOwner () {
+    uint256 public mintPrice = 0.001 ether;
+    bool public OPEN = false;
+    event OpenStatus(bool status);
+
+    function addSeason(uint256 _seasonId, address _metadataAddress) external onlyOwner () {
         seasons[_seasonId] = Season({
             id: _seasonId,
             metadataAddress: _metadataAddress
         });
     }
 
-    function setActiveSeason(uint256 _seasonId) public onlyOwner () {
+    function setActiveSeason(uint256 _seasonId) external onlyOwner () {
         activeSeason = _seasonId;
     }
 
-    function setVRFAddress(address _linkAddress, address _vrfAddress) public onlyOwner {
+    function setVRFAddress(address _linkAddress, address _vrfAddress) external onlyOwner {
         linkAddress = _linkAddress;
         vrfWrapperAddress = _vrfAddress;
     }
 
-    function setBlergsTokenAddress(address _blergsTokenAddress) public onlyOwner () {
+    function setBlergsTokenAddress(address _blergsTokenAddress) external onlyOwner () {
         blergsTokenAddress = _blergsTokenAddress;
     }
 
-    function uri(uint256 tokenId) public view override returns (string memory) {
+    function setNewPrice(uint256 _price) external onlyOwner {
+        mintPrice = _price;
+    }
+    
+    function flipOpenState() external onlyOwner {
+        OPEN = !OPEN;
+        emit OpenStatus(OPEN);
+    }
+
+    function uri(uint256 tokenId) public view override returns (string memory tokenUri) {
         uint256 groupId = (tokenId - (tokenId % 5))/5; // base token in a group
 
         for (uint256 i = 0; i < 5; i++) {
@@ -135,11 +147,14 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         });
 
         emit MintRandomRequest(requestId);
-        return requestId;
     }
     
-    function mintTraitsTest(uint256 _requestId, uint256[] memory _randomWords) public {
-        uint256[] memory ids = new uint256[](5);
+    function mintTraitsTest(uint256 _requestId, uint256[] memory _randomWords) public payable {
+        require(msg.value >= mintPrice, "Not enough ETH sent");
+        require(OPEN , "MINTING - NOT OPEN");
+        require(batchesMinted < maxMintsPerSeason[activeSeason], "MAX minted during Season");
+
+        uint256[] memory ids = new uint256[](8);
 
         statuses[_requestId] = mintStatus({
             fees: 1_500_000,
@@ -172,19 +187,11 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
             statuses[requestId].ids[i] = tokenId;
         }
 
-        uint256[] memory amounts = new uint256[](5);
-        for (uint256 i = 0; i < 5; i++) amounts[i] = 1;
+        uint256[] memory amounts = new uint256[](8);
+        for (uint256 i = 0; i < BATCH_SIZE; i++) amounts[i] = 1;
 
         batchesMinted++;
         _mintBatch(statuses[requestId].sender, statuses[requestId].ids, amounts, '');
-    }
-
-    function getStatus(uint256 requestId)
-        public
-        view
-        returns (mintStatus memory)
-    {
-        return statuses[requestId];
     }
     
     function randomRarity(uint256 input) internal view returns(uint256){
