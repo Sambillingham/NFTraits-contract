@@ -167,7 +167,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
         require(statuses[requestId].fees > 0, "Request not found");
 
-        uint256 SEASON = seasonReducer(activeSeason, randomWords[randomWords[0]% 10]);
+        uint256 SEASON = seasonReducer(activeSeason, randomWords[randomWords[0] % BATCH_SIZE]);
         
         statuses[requestId].fulfilled = true;
         for (uint256 i = 0; i < BATCH_SIZE; i++) {
