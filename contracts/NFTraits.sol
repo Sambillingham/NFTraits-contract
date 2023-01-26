@@ -11,7 +11,6 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 interface ERC721 {
     function balanceOf(address account) external view returns (uint256);
     function ownerOf(uint256 tokenId) external view returns (address);
-    function _exists(uint256 tokenId) external view returns (bool);
     function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256);
 }
 
