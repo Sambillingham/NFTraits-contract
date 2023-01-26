@@ -19,8 +19,9 @@ interface Metadata {
 }
 
 contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
-    constructor()
-        VRFV2WrapperConsumerBase(linkAddress, vrfWrapperAddress)
+
+    constructor(address _linkAddress,address _vrfWrapperAddress)
+        VRFV2WrapperConsumerBase(_linkAddress, _vrfWrapperAddress)
         ERC1155("NFT") 
     {}
 
@@ -46,10 +47,7 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     // Track Free Mints 
     mapping(uint256 => mapping(uint256 => bool)) public BlergFreeMints;
 
-    address public linkAddress;
-    address public vrfWrapperAddress;
-
-    uint32 constant callbackGasLimit = 1_000_000; 
+    uint32 public callbackGasLimit = 800_000; 
     uint32 constant numWords = 8;
     uint16 constant requestConfirmations = 3;
 
@@ -82,11 +80,6 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
 
     function setActiveSeason(uint256 _seasonId) external onlyOwner () {
         activeSeason = _seasonId;
-    }
-
-    function setVRFAddress(address _linkAddress, address _vrfAddress) external onlyOwner {
-        linkAddress = _linkAddress;
-        vrfWrapperAddress = _vrfAddress;
     }
 
     function setBlergsTokenAddress(address _blergsTokenAddress) external onlyOwner () {
