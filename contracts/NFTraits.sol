@@ -189,21 +189,23 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         uint256[] memory amounts = new uint256[](8);
         for (uint256 i = 0; i < BATCH_SIZE; i++) amounts[i] = 1;
 
-        batchesMinted++;
+        batchesMinted += 1;
         _mintBatch(statuses[requestId].sender, statuses[requestId].ids, amounts, '');
+        
+        emit MintRequestFulfilled(requestId, statuses[requestId].ids);
     }
     
-    function randomRarity(uint256 input) internal view returns(uint256){
-        uint256 COUNT = ERC721(blergsTokenAddress).balanceOf(msg.sender);
-        uint256 rarityBonus = 1 + ((RARITY_MODIFIER_PERCENTAGE/100) * COUNT);
-        if(input < 6 * rarityBonus){
-            return 4; // 5/500 -> 1%
-        } else if (input < 26 * rarityBonus){
-            return 3; // 5%
-        } else if (input < 76 * rarityBonus){
-            return 2; // 15%
-        } else if (input < 226 * rarityBonus) {
-            return 1; // 30%
+    function randomRarity(uint256 input, address sender) internal view returns(uint256){
+        uint256 COUNT = ERC721(blergsTokenAddress).balanceOf(sender);
+        uint256 rarityBonus = 100 + (RARITY_MODIFIER_PERCENTAGE * COUNT);
+        if(input*100 < 6 * rarityBonus){
+            return 4; // < 600 / 50000 ~ 5%
+        } else if (input*100 < 26 * rarityBonus){
+            return 3; // < 2600 / 50000 ~ 2.5%
+        } else if (input*100 < 76 * rarityBonus){
+            return 2; // < 7600 / 50000 ~ 7.5%
+        } else if (input*100 < 226 * rarityBonus) { 
+            return 1; // < 22600 / 50000 ~ 25%
         } else {
             return 0; // 50%
         }
