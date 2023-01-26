@@ -172,8 +172,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         statuses[requestId].fulfilled = true;
         for (uint256 i = 0; i < BATCH_SIZE; i++) {
             uint256 groupId = (randomWords[i] % groupIdMax[SEASON-1]) + groupIdMin[SEASON-1];
-            uint256 randomR = (randomWords[BATCH_SIZE-i+1] % 500)+1;
-            uint256 rarityRank = randomRarity(randomR);
+            uint256 randomR = (randomWords[BATCH_SIZE-i-1] % 500)+1; // 1 - 500
+            uint256 rarityRank = randomRarity(randomR, statuses[requestId].sender);
             uint256 tokenId = (groupId*5) + rarityRank;
 
             if(rarityRank == 4 && minted1of1[groupId]) {
