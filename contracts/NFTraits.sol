@@ -111,24 +111,24 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
         }
     }
 
-    function mintTraitsWithBlerg(uint256 tokenId) external {
-        require(ERC721(blergsTokenAddress)._exists(tokenId), "Token doesn't exist");
-        require(ERC721(blergsTokenAddress).ownerOf(tokenId) == msg.sender, "Not Owner of Token");
-        require(BlergFreeMints[tokenId][activeSeason] != true, "Mint Used");
-
-        BlergFreeMints[tokenId][activeSeason] = true;
-        callVrfMint();
-    }
-
-    function mintTraits() public payable {
-        require(msg.value >= mintPrice, "Not enough ETH sent");
-        callVrfMint();
-    }
-
-    function callVrfMint() private {
+    function mintTraitsWithBlerg(uint256 tokenId) external returns (uint256) {
         require(OPEN , "MINTING - NOT OPEN");
+        require(BlergFreeMints[tokenId][activeSeason] != true, "Mint Used");
+        require(ERC721(blergsTokenAddress).ownerOf(tokenId) == msg.sender, "Not Owner of Token");
         require(batchesMinted < maxMintsPerSeason[activeSeason], "MAX minted during Season");
 
+        BlergFreeMints[tokenId][activeSeason] = true;
+        return callVrfMint();
+    }
+    
+    function mintTraits() payable external returns (uint256) {
+        require(OPEN , "MINTING - NOT OPEN");
+        require(msg.value >= mintPrice, "Not enough ETH sent");
+        require(batchesMinted < maxMintsPerSeason[activeSeason], "MAX minted during Season");
+        return callVrfMint();
+    }
+
+    function callVrfMint() private returns (uint256) {
         uint256 requestId = requestRandomness(
             callbackGasLimit,
             requestConfirmations,
