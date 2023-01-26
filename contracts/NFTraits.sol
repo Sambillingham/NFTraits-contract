@@ -178,7 +178,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
 
             if(rarityRank == 4 && minted1of1[groupId]) {
                 tokenId = tokenId -1; // 1/1 taken downrank to ledgendary
-            } else if(rarityRank == 5){
+                console.log("tokenId: ", tokenId);
+            } else if(rarityRank == 4){ 
                 minted1of1[tokenId] = true;
             }
 
