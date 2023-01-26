@@ -26,6 +26,8 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     {}
 
     event MintRandomRequest(uint256 requestId);
+    event OpenStatus(bool status);
+    event MintRequestFulfilled(uint256 requestId, uint256[] ids);
 
     string public name = 'NFTraits';
     string public symbol = 'Trait';
@@ -93,6 +95,10 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
     function flipOpenState() external onlyOwner {
         OPEN = !OPEN;
         emit OpenStatus(OPEN);
+    }
+
+    function setCallbackGasLimit(uint32 _callbackGasLimit) external onlyOwner () {
+        callbackGasLimit = _callbackGasLimit;
     }
 
     function uri(uint256 tokenId) public view override returns (string memory tokenUri) {
