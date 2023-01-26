@@ -71,7 +71,6 @@ contract NFTraits is VRFV2WrapperConsumerBase, ERC1155, Ownable, ERC1155Supply {
 
     uint256 public mintPrice = 0.001 ether;
     bool public OPEN = false;
-    event OpenStatus(bool status);
 
     function addSeason(uint256 _seasonId, address _metadataAddress) external onlyOwner () {
         seasons[_seasonId] = Season({
