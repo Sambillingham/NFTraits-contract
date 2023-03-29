@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "hardhat/console.sol";
-
-// import "@openzeppelin/contracts/utils/Strings.sol";
 import "@0xsequence/sstore2/contracts/SSTORE2.sol";
 
 contract TraitsMetadata { 
@@ -32,8 +29,6 @@ contract TraitsMetadata {
     mapping(uint256 => uint256) intrinsicValues;
     mapping(uint256 => string) names;
 
-    // address[] private _tokenDatas; ? 
-
     mapping(uint256 => address) tokenLayers;
 
     function store (uint256 groupId, uint256[8] calldata layers, uint256 intrinsicValue, string calldata name) public {
@@ -45,13 +40,8 @@ contract TraitsMetadata {
     }
     
     function createTokenUri(uint256 tokenId) public view returns (string memory) {
-
         uint256 groupId = (tokenId - (tokenId % 5))/5; // base token in a group
         string[4] memory buffer = generateSvgData(groupId);
-        console.log(buffer[0]);
-        console.log(buffer[1]);
-        console.log(buffer[2]);
-        console.log(buffer[3]);
         string memory att = getAttributes(tokenId);
         string memory overlaySquare = overlay(tokenId);
 
@@ -72,7 +62,7 @@ contract TraitsMetadata {
         );
     }
 
-        // returns base 64 encoded overlay square based on tokenId
+    // returns base 64 encoded overlay square based on tokenId
     function overlay(uint256 tokenid) public pure returns (string memory) {
         uint256 rarityLevel = tokenid % 5;
         string[5] memory overlayOptions = ['ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzI3N2ViOCcgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzI3Yjg1YScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nI2Q2NTE1MScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nI2Y3ZGQ1OScgIHg9JzAnICB5PScwJy8+', 'ICA8cmVjdCBjbGFzcz0nbycgZmlsbD0nIzc0MjdiOCcgIHg9JzAnICB5PScwJy8+'];
@@ -100,23 +90,17 @@ contract TraitsMetadata {
     }
 
     function tokenSVG(uint256 groupId) public view returns (string memory) {
-        // 6 lots of 8 rows 
-
-        // 3 lots of 8 rowBlocks 
         string[4] memory buffer = generateSvgData(groupId);
 
         string memory svg = 
             string.concat(
-                    "PHN2ZyB2ZXJzaW9uPScxLjEnIHZpZXdCb3g9JzAgMCA0ODAgNDgwJyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHNoYXBlLXJlbmRlcmluZz0nY3Jpc3BFZGdlcyc+",
-                    buffer[0],
-                    buffer[1],
-                    buffer[2],
-                    buffer[3],
-                    // buffer[4], 
-                    // buffer[5],  
-                    "PHN0eWxlPnJlY3R7d2lkdGg6MTBweDtoZWlnaHQ6MTBweDt9PC9zdHlsZT48L3N2Zz4"
+                "PHN2ZyB2ZXJzaW9uPScxLjEnIHZpZXdCb3g9JzAgMCA0ODAgNDgwJyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHNoYXBlLXJlbmRlcmluZz0nY3Jpc3BFZGdlcyc+",
+                buffer[0],
+                buffer[1],
+                buffer[2],
+                buffer[3],
+                "PHN0eWxlPnJlY3R7d2lkdGg6MTBweDtoZWlnaHQ6MTBweDt9PC9zdHlsZT48L3N2Zz4"
             );
-            console.log('GAS:: ', gasleft());
         return svg;
     }
 
@@ -146,7 +130,6 @@ contract TraitsMetadata {
             cursorRow.three = fourPixels(coordinateLookup, cursor, colours);
             cursor.x += 4;
             cursorRow.four = fourPixels(coordinateLookup, cursor, colours);
-
             cursor.x += 4;
             cursorRow.five = fourPixels(coordinateLookup, cursor, colours);
             cursor.x += 4;
@@ -184,11 +167,9 @@ contract TraitsMetadata {
                         bufferOfRows[7]
                     )
                 );
-                console.log('GAS:: ', gasleft());
                 indexIntoBufferOfRows = 0;
             }
         }
-        console.log('GAS:: ', gasleft());
         return blockOfEightRows;
     }
     function fourPixels(string[48] memory coordinateLookup, SVGCursor memory pos, string[1024] memory colours) internal pure returns (string memory) {
