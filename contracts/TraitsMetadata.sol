@@ -202,53 +202,6 @@ contract TraitsMetadata {
         );
     }
 
-    function sixPixels(string[48] memory coordinateLookup, SVGCursor memory pos, string[1024] memory colours) internal pure returns (string memory) {
-        return
-            string.concat(
-                string.concat(
-                    "PHJlY3QgICBmaWxsPScj",
-                    colours[(pos.y * 24)+ pos.x],
-                    "JyAgeD0n",
-                    coordinateLookup[pos.x],
-                    "JyAgeT0n",
-                    coordinateLookup[pos.y],
-                    "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 24)+ pos.x +1],
-                    "JyAgeD0n",
-                    coordinateLookup[pos.x + 1],
-                    "JyAgeT0n",
-                    coordinateLookup[pos.y],
-                    "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 24)+ pos.x +2],
-                    "JyAgeD0n",
-                    coordinateLookup[pos.x + 2],
-                    "JyAgeT0n",
-                    coordinateLookup[pos.y]
-                ),
-                string.concat(
-                    "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 24)+ pos.x +3],
-                    "JyAgeD0n",
-                    coordinateLookup[pos.x + 3],
-                    "JyAgeT0n",
-                    coordinateLookup[pos.y],
-                    "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 24)+ pos.x +4],
-                    "JyAgeD0n",
-                    coordinateLookup[pos.x + 4],
-                    "JyAgeT0n",
-                    coordinateLookup[pos.y],
-                    "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 24)+ pos.x +5],
-                    "JyAgeD0n",
-                    coordinateLookup[pos.x + 5],
-                    "JyAgeT0n",
-                    coordinateLookup[pos.y],
-                    "JyAgIC8+"
-                )
-            );
-    }
-
     function getColoursFromLayers (uint256 groupId) public view returns (string[1024] memory){
         bytes1[8] memory bitMask;
         bitMask[0] = (0x7F); // 01111111
