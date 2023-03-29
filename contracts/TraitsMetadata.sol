@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "hardhat/console.sol";
 
-import "@openzeppelin/contracts/utils/Strings.sol";
+// import "@openzeppelin/contracts/utils/Strings.sol";
 import "@0xsequence/sstore2/contracts/SSTORE2.sol";
 
 contract TraitsMetadata { 
@@ -36,7 +36,7 @@ contract TraitsMetadata {
 
     mapping(uint256 => address) tokenLayers;
 
-    function store (uint256 groupId, uint256[18] calldata layers, uint256 intrinsicValue, string calldata name) public {
+    function store (uint256 groupId, uint256[8] calldata layers, uint256 intrinsicValue, string calldata name) public {
         tokenLayers[groupId] = SSTORE2.write(abi.encode(layers));
 
         // abi encode/decode with token layers?
@@ -47,22 +47,24 @@ contract TraitsMetadata {
     function createTokenUri(uint256 tokenId) public view returns (string memory) {
 
         uint256 groupId = (tokenId - (tokenId % 5))/5; // base token in a group
-        string[6] memory buffer = generateSvgData(groupId);
+        string[4] memory buffer = generateSvgData(groupId);
+        console.log(buffer[0]);
+        console.log(buffer[1]);
+        console.log(buffer[2]);
+        console.log(buffer[3]);
         string memory att = getAttributes(tokenId);
         string memory overlaySquare = overlay(tokenId);
 
         return
             string(
                 abi.encodePacked(
-                    "data:application/json;base64,eyAgImltYWdlX2RhdGEiOiAiPHN2ZyB2ZXJzaW9uPScxLjEnIHZpZXdCb3g9JzAgMCA0ODAgNDgwJyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHNoYXBlLXJlbmRlcmluZz0nY3Jpc3BFZGdlcyc+",
+                    "data:application/json;base64,eyAgImltYWdlX2RhdGEiOiAiPHN2ZyB2ZXJzaW9uPScxLjEnIHZpZXdCb3g9JzAgMCAzMjAgMzIwJyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHNoYXBlLXJlbmRlcmluZz0nY3Jpc3BFZGdlcyc+",
                     buffer[0],
                     buffer[1],
                     buffer[2],
                     buffer[3],
-                    buffer[4], 
-                    buffer[5],
                     overlaySquare,
-                    "PHN0eWxlPnJlY3Qge3dpZHRoOjEwcHg7aGVpZ2h0OjEwcHg7IH0gLm8geyBtaXgtYmxlbmQtbW9kZTogb3ZlcmxheTsgd2lkdGg6IDQ4MHB4OyBoZWlnaHQ6IDQ4MHB4OyB9IDwvc3R5bGU+PC9zdmc+IiwgICJuYW1lIjogIlRyYWl0cy4g", //style tag + name
+                    "PHN0eWxlPnJlY3Qge3dpZHRoOjEwcHg7aGVpZ2h0OjEwcHg7IH0gLm8geyBtaXgtYmxlbmQtbW9kZTogb3ZlcmxheTsgd2lkdGg6IDMyMHB4OyBoZWlnaHQ6IDMyMHB4OyB9IDwvc3R5bGU+PC9zdmc+IiwgICJuYW1lIjogIlRyYWl0cy4g", //style tag + name
                     names[groupId],// name here - needs to be pre-base64 encoded or padded with space char before encoding 
                     "IiwgImRlc2NyaXB0aW9uIjogIlRyYWl0cyIs", // description 
                     att // last (okay if it includes padding at the end )
@@ -99,7 +101,9 @@ contract TraitsMetadata {
 
     function tokenSVG(uint256 groupId) public view returns (string memory) {
         // 6 lots of 8 rows 
-        string[6] memory buffer = generateSvgData(groupId);
+
+        // 3 lots of 8 rowBlocks 
+        string[4] memory buffer = generateSvgData(groupId);
 
         string memory svg = 
             string.concat(
@@ -108,15 +112,15 @@ contract TraitsMetadata {
                     buffer[1],
                     buffer[2],
                     buffer[3],
-                    buffer[4], 
-                    buffer[5],  
+                    // buffer[4], 
+                    // buffer[5],  
                     "PHN0eWxlPnJlY3R7d2lkdGg6MTBweDtoZWlnaHQ6MTBweDt9PC9zdHlsZT48L3N2Zz4"
             );
             console.log('GAS:: ', gasleft());
         return svg;
     }
 
-    function generateSvgData(uint256 groupId) private view returns (string[6] memory) {
+    function generateSvgData(uint256 groupId) private view returns (string[4] memory) {
         SVGCursor memory cursor;
 
         SVGRowBuffer memory cursorRow;
@@ -124,7 +128,7 @@ contract TraitsMetadata {
         string[8] memory bufferOfRows;
         uint8 indexIntoBufferOfRows;
 
-        string[6] memory blockOfEightRows;
+        string[4] memory blockOfEightRows;
         uint8 indexIntoblockOfEightRows;
 
         // base64-encoded svg coordinates from 010 to 470
@@ -132,25 +136,25 @@ contract TraitsMetadata {
             "MDAw", "MDEw", "MDIw", "MDMw", "MDQw", "MDUw", "MDYw", "MDcw", "MDgw", "MDkw", "MTAw", "MTEw", "MTIw", "MTMw", "MTQw", "MTUw", "MTYw", "MTcw", "MTgw", "MTkw", "MjAw", "MjEw", "MjIw", "MjMw", "MjQw", "MjUw", "MjYw", "Mjcw", "Mjgw", "Mjkw", "MzAw", "MzEw", "MzIw", "MzMw", "MzQw", "MzUw", "MzYw", "Mzcw", "Mzgw", "Mzkw", "NDAw", "NDEw", "NDIw", "NDMw", "NDQw", "NDUw", "NDYw", "NDcw"
         ];
 
-        string[2304] memory colours  = getColoursFromLayers(groupId);
+        string[1024] memory colours  = getColoursFromLayers(groupId);
 
-        for (uint256 row = 0; row < 48; row++) {
-            
-            cursorRow.one = sixPixels(coordinateLookup, cursor, colours);
-            cursor.x += 6;
-            cursorRow.two = sixPixels(coordinateLookup, cursor, colours);
-            cursor.x += 6;
-            cursorRow.three = sixPixels(coordinateLookup, cursor, colours);
-            cursor.x += 6;
-            cursorRow.four = sixPixels(coordinateLookup, cursor, colours);
-            cursor.x += 6;
-            cursorRow.five = sixPixels(coordinateLookup, cursor, colours);
-            cursor.x += 6;
-            cursorRow.six = sixPixels(coordinateLookup, cursor, colours);
-            cursor.x += 6;
-            cursorRow.seven = sixPixels(coordinateLookup, cursor, colours);
-            cursor.x += 6;
-            cursorRow.eight = sixPixels(coordinateLookup, cursor, colours);
+        for (uint256 row = 0; row < 32; row++) {
+            cursorRow.one = fourPixels(coordinateLookup, cursor, colours);
+            cursor.x += 4;
+            cursorRow.two = fourPixels(coordinateLookup, cursor, colours);
+            cursor.x += 4;
+            cursorRow.three = fourPixels(coordinateLookup, cursor, colours);
+            cursor.x += 4;
+            cursorRow.four = fourPixels(coordinateLookup, cursor, colours);
+
+            cursor.x += 4;
+            cursorRow.five = fourPixels(coordinateLookup, cursor, colours);
+            cursor.x += 4;
+            cursorRow.six = fourPixels(coordinateLookup, cursor, colours);
+            cursor.x += 4;
+            cursorRow.seven = fourPixels(coordinateLookup, cursor, colours);
+            cursor.x += 4;
+            cursorRow.eight = fourPixels(coordinateLookup, cursor, colours);
             
             // Stack too deep if single list og string concat
             bufferOfRows[indexIntoBufferOfRows++] = string.concat(
@@ -168,7 +172,6 @@ contract TraitsMetadata {
             cursor.y += 1;
             
             if (indexIntoBufferOfRows >= 8) {
-
                 blockOfEightRows[indexIntoblockOfEightRows++] = string(
                     abi.encodePacked(
                         bufferOfRows[0],
@@ -188,25 +191,54 @@ contract TraitsMetadata {
         console.log('GAS:: ', gasleft());
         return blockOfEightRows;
     }
-    
-    function sixPixels(string[48] memory coordinateLookup, SVGCursor memory pos, string[2304] memory colours) internal pure returns (string memory) {
+    function fourPixels(string[48] memory coordinateLookup, SVGCursor memory pos, string[1024] memory colours) internal pure returns (string memory) {
+        return string.concat(
+            "PHJlY3QgICBmaWxsPScj",
+            colours[(pos.y * 32)+ pos.x],
+            "JyAgeD0n",
+            coordinateLookup[pos.x],
+            "JyAgeT0n",
+            coordinateLookup[pos.y],
+            "JyAvPjxyZWN0ICBmaWxsPScj",
+            colours[(pos.y * 32)+ pos.x +1],
+            "JyAgeD0n",
+            coordinateLookup[pos.x + 1],
+            "JyAgeT0n",
+            coordinateLookup[pos.y],
+            "JyAvPjxyZWN0ICBmaWxsPScj",
+            colours[(pos.y * 32)+ pos.x +2],
+            "JyAgeD0n",
+            coordinateLookup[pos.x + 2],
+            "JyAgeT0n",
+            coordinateLookup[pos.y],
+            "JyAvPjxyZWN0ICBmaWxsPScj",
+            colours[(pos.y * 32)+ pos.x +3],
+            "JyAgeD0n",
+            coordinateLookup[pos.x + 3],
+            "JyAgeT0n",
+            coordinateLookup[pos.y],
+            "JyAgIC8+"
+        );
+    }
+
+    function sixPixels(string[48] memory coordinateLookup, SVGCursor memory pos, string[1024] memory colours) internal pure returns (string memory) {
         return
             string.concat(
                 string.concat(
                     "PHJlY3QgICBmaWxsPScj",
-                    colours[(pos.y * 48)+ pos.x],
+                    colours[(pos.y * 24)+ pos.x],
                     "JyAgeD0n",
                     coordinateLookup[pos.x],
                     "JyAgeT0n",
                     coordinateLookup[pos.y],
                     "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 48)+ pos.x +1],
+                    colours[(pos.y * 24)+ pos.x +1],
                     "JyAgeD0n",
                     coordinateLookup[pos.x + 1],
                     "JyAgeT0n",
                     coordinateLookup[pos.y],
                     "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 48)+ pos.x +2],
+                    colours[(pos.y * 24)+ pos.x +2],
                     "JyAgeD0n",
                     coordinateLookup[pos.x + 2],
                     "JyAgeT0n",
@@ -214,19 +246,19 @@ contract TraitsMetadata {
                 ),
                 string.concat(
                     "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 48)+ pos.x +3],
+                    colours[(pos.y * 24)+ pos.x +3],
                     "JyAgeD0n",
                     coordinateLookup[pos.x + 3],
                     "JyAgeT0n",
                     coordinateLookup[pos.y],
                     "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 48)+ pos.x +4],
+                    colours[(pos.y * 24)+ pos.x +4],
                     "JyAgeD0n",
                     coordinateLookup[pos.x + 4],
                     "JyAgeT0n",
                     coordinateLookup[pos.y],
                     "JyAvPjxyZWN0ICBmaWxsPScj",
-                    colours[(pos.y * 48)+ pos.x +5],
+                    colours[(pos.y * 24)+ pos.x +5],
                     "JyAgeD0n",
                     coordinateLookup[pos.x + 5],
                     "JyAgeT0n",
@@ -236,7 +268,7 @@ contract TraitsMetadata {
             );
     }
 
-    function getColoursFromLayers (uint256 groupId) public view returns (string[2304] memory){
+    function getColoursFromLayers (uint256 groupId) public view returns (string[1024] memory){
         bytes1[8] memory bitMask;
         bitMask[0] = (0x7F); // 01111111
         bitMask[1] = (0xBF); // 10111111
@@ -247,16 +279,16 @@ contract TraitsMetadata {
         bitMask[6] = (0xFD); // 11111101
         bitMask[7] = (0xFE); // 11111110
         
-        string[2304] memory colours;
+        string[1024] memory colours;
 
         uint8 bit1;
         uint8 bit2;
         
-        uint256[18] memory layers = abi.decode( SSTORE2.read(tokenLayers[groupId]), (uint256[18]));
+        uint256[8] memory layers = abi.decode( SSTORE2.read(tokenLayers[groupId]), (uint256[8]));
 
-        for (uint256 l; l < 9; l++) {
+        for (uint256 l; l < 4; l++) {
             bytes32 layer1 = bytes32(uint256(layers[l]));
-            bytes32 layer2 = bytes32(uint256(layers[l+9]));
+            bytes32 layer2 = bytes32(uint256(layers[l+4]));
             for (uint256 i; i < 32; i++) {
                 for (uint256 b; b < bitMask.length; b++) {
                     bit1 = (bitMask[b] | bytes1(uint8(layer1[i])) == bytes1(uint8(0xFF))) ? 1 : 0;
